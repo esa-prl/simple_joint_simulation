@@ -8,10 +8,10 @@ from rover_msgs.msg import JointCommandArray
 
 from sensor_msgs.msg import JointState
 
-class SimpleRoverSimulation(Node):
+class SimpleJointSimulation(Node):
     def __init__(self):
         # Init Node
-        self.node_name = 'simple_rover_simulation_node'
+        self.node_name = 'simple_joint_simulation_node'
         super().__init__(self.node_name)
 
         # Init Params
@@ -62,16 +62,16 @@ class SimpleRoverSimulation(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    simple_rover_simulation = SimpleRoverSimulation()
+    simple_joint_simulation = SimpleJointSimulation()
 
-    simple_rover_simulation.spin()
+    simple_joint_simulation.spin()
 
     # TODO: catch CTRL+C exception and close node gracefully.
-    simple_rover_simulation.stop()
+    simple_joint_simulation.stop()
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    simple_rover_simulation.destroy_node()
+    simple_joint_simulation.destroy_node()
     rclpy.shutdown()
 
 

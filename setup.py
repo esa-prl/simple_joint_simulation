@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'simple_rover_simulation'
+package_name = 'simple_joint_simulation'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simple_rover_simulation_node = simple_rover_simulation.simple_rover_simulation_node:main'
+            'simple_joint_simulation_node = simple_joint_simulation.simple_joint_simulation_node:main'
         ],
     },
 )
