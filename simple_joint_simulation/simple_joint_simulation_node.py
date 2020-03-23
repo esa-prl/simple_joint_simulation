@@ -18,7 +18,7 @@ class SimpleJointSimulation(Node):
         self.init_params()
 
         # Create Publishers        
-        self.joint_states_pub_ = self.create_publisher(JointState, 'joint_states', 10)
+        self.joint_states_pub_ = self.create_publisher(JointState, 'joint_states_sim', 10)
 
         # Create Subscriptions
         self.create_subscription(JointCommandArray, 'rover_joint_cmds', self.joint_cmds_callback, 10)
@@ -47,6 +47,7 @@ class SimpleJointSimulation(Node):
                 joint_msg.name.append(joint_command.name)
                 joint_msg.position.append(joint_command.value)
                 joint_msg.effort.append(0.0)
+                joint_msg.velocity.append(0.0)
 
         self.joint_states_pub_.publish(joint_msg)
 
