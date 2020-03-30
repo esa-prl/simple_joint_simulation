@@ -77,6 +77,7 @@ class SimpleJointSimulation(Node):
 
                     # Only populate set the new position and velocity if the command came within half a second
                     if delta_t < 0.5:
+                        # Compute new position with velocity*d_t + position_previos
                         new_position = joint_command.value*delta_t + self.prev_vel_joint_states[joint_command.name]['position']
 
                         # Populate new message
@@ -92,9 +93,6 @@ class SimpleJointSimulation(Node):
                     self.prev_vel_joint_states[joint_command.name]['stamp'] = joint_msg.header.stamp
                     self.prev_vel_joint_states[joint_command.name]['effort'] = 0.0
                     self.prev_vel_joint_states[joint_command.name]['velocity'] = joint_command.value
-
-
-
 
         self.joint_states_pub_.publish(joint_msg)
 
