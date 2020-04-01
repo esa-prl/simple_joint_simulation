@@ -21,7 +21,7 @@ class SimpleJointSimulation(Node):
         self.joint_states_pub_ = self.create_publisher(JointState, 'joint_states_sim', 10)
 
         # Create Subscriptions
-        self.create_subscription(JointCommandArray, 'rover_joint_cmds', self.joint_cmds_callback, 10)
+        self.create_subscription(JointCommandArray, 'joint_cmds', self.joint_cmds_callback, 10)
 
     def init_params(self):
         # Previous Joint Command Data - This might not contain data of all joints
