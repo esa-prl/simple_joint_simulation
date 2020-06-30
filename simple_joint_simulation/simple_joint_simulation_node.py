@@ -9,9 +9,10 @@ from sensor_msgs.msg import JointState
 
 
 class SimpleJointSimulation(Node):
+    """Simulates a joint for every joint command received."""
 
     def __init__(self):
-        # Init Node
+        """Initialize the node."""
         self.node_name = 'simple_joint_simulation_node'
         super().__init__(self.node_name)
 
@@ -25,13 +26,14 @@ class SimpleJointSimulation(Node):
         self.create_subscription(JointCommandArray, 'joint_cmds', self.joint_cmds_callback, 10)
 
     def init_params(self):
+        """Initialize the member variables."""
         # Previous Joint Command Data - This might not contain data of all joints
         self.prev_data = JointCommandArray()
         # Continuously updated dictionary with the last veloctity joint data.
         self.prev_vel_joint_states = {}
 
     def joint_cmds_callback(self, data):
-
+        """Process joint commands and send the simulated joint states."""
         self.curr_data = data
 
         # Initialize the prev_data message the first time.
@@ -45,7 +47,7 @@ class SimpleJointSimulation(Node):
         for joint_command in self.curr_data.joint_command_array:
 
             # Handle steering and deployment joints
-            if joint_command.mode == "POSITION":
+            if joint_command.mode == 'POSITION':
                 # Set commanded position as joint state
                 joint_msg.header.stamp = super().get_clock().now().to_msg()
 
@@ -54,7 +56,7 @@ class SimpleJointSimulation(Node):
                 joint_msg.effort.append(0.0)
                 joint_msg.velocity.append(0.0)
 
-            if joint_command.mode == "VELOCITY":
+            if joint_command.mode == 'VELOCITY':
                 # Check if previous information about joint is present:
                 if joint_command.name not in self.prev_vel_joint_states:
                     # Add joint to prev_vel_joint_states in case it was not added before
@@ -102,14 +104,17 @@ class SimpleJointSimulation(Node):
         self.joint_states_pub_.publish(joint_msg)
 
     def spin(self):
+        """Proccess all callbacks in spin_once."""
         while rclpy.ok():
             rclpy.spin_once(self)
 
     def stop(self):
+        """Shutdown proceedure."""
         rclpy.loginfo('{} STOPPED.'.format(self.node_name.upper()))
 
 
 def main(args=None):
+    """Shutdown proceedure."""
     rclpy.init(args=args)
 
     simple_joint_simulation = SimpleJointSimulation()
