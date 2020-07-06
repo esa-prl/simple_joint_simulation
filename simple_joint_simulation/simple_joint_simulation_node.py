@@ -25,20 +25,24 @@ class SimpleJointSimulation(Node):
         # Create Subscriptions
         self.create_subscription(JointCommandArray, 'joint_cmds', self.joint_cmds_callback, 10)
 
+        self.get_logger().info('\t{} STARTED.'.format(self.node_name.upper()))
+
     def init_params(self):
         """Initialize the member variables."""
-        # Previous Joint Command Data - This might not contain data of all joints
-        self.prev_data = JointCommandArray()
+        self.curr_data = JointCommandArray()
         # Continuously updated dictionary with the last veloctity joint data.
         self.prev_vel_joint_states = {}
 
     def joint_cmds_callback(self, data):
-        """Process joint commands and send the simulated joint states."""
+        """Save joint commands."""
         self.curr_data = data
 
-        # Initialize the prev_data message the first time.
-        if len(self.prev_data.joint_command_array) == 0:
-            self.prev_data = data
+        self.get_logger().info('Received DATA.'.format(self.node_name.upper()))
+
+    def update_joint_states(self):
+        """Process joint commands and send the simulated joint states."""
+        # Only process data has already arrived
+        if len(self.curr_data.joint_command_array) == 0:
             return
 
         joint_msg = JointState()
@@ -74,10 +78,12 @@ class SimpleJointSimulation(Node):
 
                     # This is how to get ros2 time now:
                     # s_n = super().get_clock().now().seconds_nanoseconds()
+                    # Get time in seconds and nanoseconds tuple ()
+                    time_s_n = super().get_clock().now().seconds_nanoseconds()
 
-                    # Compute time from last command to new command in seconds [s]
-                    delta_t = joint_msg.header.stamp.sec - self.prev_vel_joint_states[joint_command.name]['stamp'].sec + \
-                       round((joint_msg.header.stamp.nanosec - self.prev_vel_joint_states[joint_command.name]['stamp'].nanosec)/pow(10, 9), 3)
+                    # Compute time from last command to current time in seconds [s]
+                    delta_t = time_s_n[0] - self.prev_vel_joint_states[joint_command.name]['stamp'].sec + \
+                       round((time_s_n[1] - self.prev_vel_joint_states[joint_command.name]['stamp'].nanosec)/pow(10, 9), 3)
 
                     # Only  set the new position and velocity if the command came within half a sec
                     if delta_t < 0.5:
@@ -106,7 +112,11 @@ class SimpleJointSimulation(Node):
     def spin(self):
         """Proccess all callbacks in spin_once."""
         while rclpy.ok():
-            rclpy.spin_once(self)
+            print("BLABL")
+            self.update_joint_states()
+            rclpy.spin_once(self, timeout_sec=0.1)
+            print("BLABLA")
+
 
     def stop(self):
         """Shutdown proceedure."""
