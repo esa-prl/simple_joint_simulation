@@ -33,11 +33,12 @@ class SimpleJointSimulation(Node):
         # Continuously updated dictionary with the last veloctity joint data.
         self.prev_vel_joint_states = {}
 
-    def joint_cmds_callback(self, data):
-        """Save joint commands."""
-        self.curr_data = data
+        self.declare_parameter('update_rate', 10.0)
+        self.update_rate = self.get_parameter('update_rate').value
 
-        self.get_logger().info('Received DATA.'.format(self.node_name.upper()))
+    def joint_cmds_callback(self, data):
+        """Save current joint commands."""
+        self.curr_data = data
 
     def update_joint_states(self):
         """Process joint commands and send the simulated joint states."""
@@ -112,10 +113,8 @@ class SimpleJointSimulation(Node):
     def spin(self):
         """Proccess all callbacks in spin_once."""
         while rclpy.ok():
-            print("BLABL")
             self.update_joint_states()
-            rclpy.spin_once(self, timeout_sec=0.1)
-            print("BLABLA")
+            rclpy.spin_once(self, timeout_sec=1.0/self.update_rate)
 
 
     def stop(self):
