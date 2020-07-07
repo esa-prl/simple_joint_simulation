@@ -29,7 +29,8 @@ class SimpleJointSimulation(Node):
 
     def init_params(self):
         """Initialize the member variables."""
-        self.curr_data = JointCommandArray()
+        self.new_joint_commands = JointCommandArray()
+        self.last_joint_commmands = {}
         # Continuously updated dictionary with the last veloctity joint data.
         self.prev_vel_joint_states = {}
 
@@ -38,19 +39,22 @@ class SimpleJointSimulation(Node):
 
     def joint_cmds_callback(self, data):
         """Save current joint commands."""
-        self.curr_data = data
+        self.new_joint_commands = data
+
+        # Save new joint command into dict with last joint commands data
+        for joint_command in self.new_joint_commands.joint_command_array:
+            self.last_joint_commmands[joint_command.name] = joint_command
 
     def update_joint_states(self):
         """Process joint commands and send the simulated joint states."""
-        # Only process data has already arrived
-        if len(self.curr_data.joint_command_array) == 0:
+        # Only process continue if data has already arrived
+        if len(self.new_joint_commands.joint_command_array) == 0:
             return
 
         joint_msg = JointState()
 
         # Loop through all joint commands
-        for joint_command in self.curr_data.joint_command_array:
-
+        for names, joint_command in self.last_joint_commmands.items():
             # Handle steering and deployment joints
             if joint_command.mode == 'POSITION':
                 # Set commanded position as joint state
@@ -62,7 +66,7 @@ class SimpleJointSimulation(Node):
                 joint_msg.velocity.append(0.0)
 
             if joint_command.mode == 'VELOCITY':
-                # Check if previous information about joint is present:
+                # Initialize joint state if the joint is new.
                 if joint_command.name not in self.prev_vel_joint_states:
                     # Add joint to prev_vel_joint_states in case it was not added before
                     self.prev_vel_joint_states[joint_command.name] = {}
@@ -74,39 +78,36 @@ class SimpleJointSimulation(Node):
                     # velocity is set to zero since no motion has taken place yet
                     self.prev_vel_joint_states[joint_command.name]['velocity'] = 0.0
 
+                # Calculate new joint position by integrating the velocity command
                 else:
                     joint_msg.header.stamp = super().get_clock().now().to_msg()
 
-                    # This is how to get ros2 time now:
-                    # s_n = super().get_clock().now().seconds_nanoseconds()
-                    # Get time in seconds and nanoseconds tuple ()
+                    # Get time in seconds and nanoseconds tuple (sec, nanosec)
                     time_s_n = super().get_clock().now().seconds_nanoseconds()
 
                     # Compute time from last command to current time in seconds [s]
                     delta_t = time_s_n[0] - self.prev_vel_joint_states[joint_command.name]['stamp'].sec + \
                        round((time_s_n[1] - self.prev_vel_joint_states[joint_command.name]['stamp'].nanosec)/pow(10, 9), 3)
 
-                    # Only  set the new position and velocity if the command came within half a sec
-                    if delta_t < 0.5:
-                        # Compute new position with velocity*d_t + position_previos
-                        new_position = joint_command.value * delta_t + self.prev_vel_joint_states[
-                            joint_command.name]['position']
+                    # Compute new position with velocity*d_t + position_previos
+                    new_position = joint_command.value * delta_t + self.prev_vel_joint_states[
+                        joint_command.name]['position']
 
-                        # Populate new message
-                        joint_msg.name.append(joint_command.name)
-                        joint_msg.position.append(new_position)
-                        joint_msg.effort.append(0.0)
-                        joint_msg.velocity.append(joint_command.value)
-
-                        self.prev_vel_joint_states[joint_command.name]['position'] = new_position
-                    else:
-                        self.prev_vel_joint_states[joint_command.name]['position'] = 0.0
-
+                    # Update previous velocity joint states
+                    self.prev_vel_joint_states[
+                        joint_command.name]['position'] = new_position
                     self.prev_vel_joint_states[
                         joint_command.name]['stamp'] = joint_msg.header.stamp
-                    self.prev_vel_joint_states[joint_command.name]['effort'] = 0.0
+                    self.prev_vel_joint_states[
+                        joint_command.name]['effort'] = 0.0
                     self.prev_vel_joint_states[
                         joint_command.name]['velocity'] = joint_command.value
+
+                    # Populate new message
+                    joint_msg.name.append(joint_command.name)
+                    joint_msg.position.append(new_position)
+                    joint_msg.effort.append(0.0)
+                    joint_msg.velocity.append(joint_command.value)
 
         self.joint_states_pub_.publish(joint_msg)
 
@@ -115,7 +116,6 @@ class SimpleJointSimulation(Node):
         while rclpy.ok():
             self.update_joint_states()
             rclpy.spin_once(self, timeout_sec=1.0/self.update_rate)
-
 
     def stop(self):
         """Shutdown proceedure."""
