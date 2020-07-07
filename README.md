@@ -4,11 +4,9 @@
 
 This packages provides a very simple simulation of joints for visiualization of joint states in RVIZ. It is designed to work in conjunction with [joint_state_publisher](http://wiki.ros.org/joint_state_publisher), the [robot_state_publisher](http://wiki.ros.org/robot_state_publisher) and the joint_command message defined in [rover_msgs].
 
-It takes joint commands as inputs and outputs joint states. It differentiates between position and velocity controlled joints.
+It listens to joint commands and publishes simulated joint states. It differentiates between position and velocity controlled joints. The position commands are returned as joint states while the velocity commands are used to integrate the new joint position at a specified update rate. The velocity simulation assumes infinite accelaration to the desired velocity.
 
-Velocity controlled joints are currently only simulated in the joint command callback. Thus, a constant stream of joint commands is required to keep the joint moving in the desired velocity.
-
-**Keywords:** joint, states, simulation, package
+**Keywords:** joint, states, simulation
 
 ### License
 
@@ -61,7 +59,7 @@ Outputs joint states based on joint commands.
 
 * **`/joint_states_sim`** ([sensor_msgs/JointState])
 
-	The simulated joint states which shall be added as a joint state source to the `joint_state_publisher`. The `joint_state_publisher` then publishes the `/joint_states` topic containint all joint states.
+	The simulated joint states which shall be added as a joint_state_source to the `joint_state_publisher`. The `joint_state_publisher` then publishes the `/joint_states` topic containint all joint states.
 
 ## Bugs & Feature Requests
 
