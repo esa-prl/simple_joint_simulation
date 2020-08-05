@@ -16,7 +16,7 @@ setup(
     maintainer='Miro Voellmy',
     maintainer_email='miro.voellmy@esa.int',
     description='This package simply sends the joint states back as requested in the rover_joint_cmds.',
-    license='TODO: License declaration',
+    license='GPLv3',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

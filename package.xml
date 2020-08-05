@@ -5,7 +5,7 @@
   <version>0.0.0</version>
   <description>This package simply sends the joint states back as requested in the rover_joint_cmds.</description>
   <maintainer email="miro.voellmy@esa.int">Miro Voellmy</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPLv3</license>
   
   <depend>rover_msgs</depend>
   <depend>sensor_msgs</depend>
