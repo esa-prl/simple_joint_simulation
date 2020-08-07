@@ -10,7 +10,7 @@ It listens to joint commands and publishes simulated joint states. It differenti
 
 ### License
 
-The source code is released under a [TODO: Add License](s).
+The source code is released under a [GPLv3 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 **Author: Miro Voellmy<br />
 Affiliation: [European Space Agency](https://www.esa.int/)<br />
